@@ -1,0 +1,6 @@
+lsvenv/
+__pycache__/
+*.pyc
+.env
+Backend/firebase_config.json
+firebase_config.json
