@@ -1,6 +1,6 @@
-venv/
+
 __pycache__/
 *.pyc
-.env
-Backend/firebase_config.json
+.venv/
 Backend/.env
+Backend/instance/
