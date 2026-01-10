@@ -36,8 +36,20 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 cred_path = os.path.join(BASE_DIR, "firebase_config.json")
 
 print("Looking for Firebase config at:", cred_path)
-cred = credentials.Certificate(cred_path)
-initialize_app(cred)
+
+# Make Firebase optional: if the service account file isn't present, continue
+# but mark Firebase as disabled so routes depending on it can return helpful errors.
+FIREBASE_ENABLED = False
+try:
+    if os.path.exists(cred_path):
+        cred = credentials.Certificate(cred_path)
+        initialize_app(cred)
+        FIREBASE_ENABLED = True
+    else:
+        print("Firebase config not found — continuing without Firebase.")
+except Exception as e:
+    print("Failed to initialize Firebase Admin SDK:", e)
+    FIREBASE_ENABLED = False
 
 # ------------------------- #
 # Flask Setup
@@ -213,6 +225,8 @@ def firebase_login():
     """
     Frontend sends: { idToken: <Firebase ID Token> }
     """
+    if not FIREBASE_ENABLED:
+        return jsonify({'success': False, 'message': f'Firebase not configured. Place service account JSON at: {cred_path}'}), 500
     data = request.get_json()
     id_token = data.get('idToken')
     if not id_token:
@@ -475,21 +489,20 @@ def donor_profile():
 def recipient_requests():
     return jsonify({"message": "Welcome Recipient! Here are your requests."})
 # ------------------------- #
-@app.route("/auth/login", methods=["POST"])
-def adlogin():
-    # verify username/password
-    access_token = create_access_token(identity={"username": user.username, "role": user.role})
-    
-    # return token + optional redirect URL
-    redirect_url = ""
-    if user.role == "admin":
-        redirect_url = "/admin/dashboard"
-    elif user.role == "donor":
-        redirect_url = "/donor/profile"
-    elif user.role == "recipient":
-        redirect_url = "/recipient/requests"
-    
-    return jsonify({"access_token": access_token, "redirect": redirect_url})
+def generate_avatar(name):
+    try:
+        if not name:
+            return "https://api.dicebear.com/7.x/initials/svg?seed=U"
+        
+        # Extract initials
+        parts = name.split()
+        initials = "".join([part[0].upper() for part in parts if part])
+        
+        # Use Dicebear API to generate avatar (no auth needed)
+        return f"https://api.dicebear.com/7.x/initials/svg?seed={initials}&scale=70"
+    except Exception as e:
+        print(f"Avatar generation failed: {e}")
+        return "https://api.dicebear.com/7.x/avataaars/svg?seed=default"
 #------------------------- #
 # Get pending donors
 @app.route("/admin/pending-donors", methods=["GET"])
