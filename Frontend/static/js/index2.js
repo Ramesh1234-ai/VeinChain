@@ -2,15 +2,16 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyCm6-ZYpq5umb38eehnu2-nAcNrNAx5cNo",
-    authDomain: "firestore-8a746.firebaseapp.com",
-    projectId: "firestore-8a746",
-    storageBucket: "firestore-8a746.firebasestorage.app",
-    messagingSenderId: "653390996882",
-    appId: "1:653390996882:web:7df3b351c1f1432f194d4b",
-    measurementId: "G-SWWDCPN18E"
+  // IMPORTANT: Move Firebase config to Backend/.env or Backend/firebase_config.json
+  // DO NOT store credentials in frontend code
+  const firebaseConfig = window.FIREBASE_CONFIG || {
+    apiKey: "REPLACE_WITH_YOUR_API_KEY",
+    authDomain: "REPLACE_WITH_YOUR_AUTH_DOMAIN",
+    projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
+    storageBucket: "REPLACE_WITH_YOUR_STORAGE_BUCKET",
+    messagingSenderId: "REPLACE_WITH_YOUR_SENDER_ID",
+    appId: "REPLACE_WITH_YOUR_APP_ID",
+    measurementId: "REPLACE_WITH_YOUR_MEASUREMENT_ID"
   };
 
   // Initialize Firebase
@@ -30,7 +31,7 @@
     }
 
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/auth/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
@@ -43,21 +44,25 @@
         localStorage.setItem("token", data.access_token);
         localStorage.setItem("userData", JSON.stringify(data.user));
 
-        // 🔹 Log login event into Firestore
-        await addDoc(collection(db, "loginEvents"), {
-         email: email,
-          role: data.user.role || "unknown",
-          timestamp: serverTimestamp()
-        });
+        // Log login event into Firestore (if configured)
+        try {
+          await addDoc(collection(db, "loginEvents"), {
+            email: email,
+            role: data.user.role || "unknown",
+            timestamp: serverTimestamp()
+          });
+        } catch (firestoreError) {
+          console.warn("Could not log to Firestore:", firestoreError);
+        }
 
         // Redirect based on role
         const role = data.user.role;
         if (role === "admin") {
           window.location.href = "adminPanel.html";
         } else if (role === "donor") {
-          window.location.href = "donor-dashboard.html";
+          window.location.href = "dashboard.html";
         } else if (role === "recipient") {
-          window.location.href = "recipient-dashboard.html";
+          window.location.href = "Recipent.html";
         } else {
           window.location.href = "index.html";
         }
@@ -70,5 +75,3 @@
       alert("Network or server error.");
     }
   });
-
-    

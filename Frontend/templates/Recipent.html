@@ -916,7 +916,7 @@
     document.getElementById("userName").textContent = data.username;
     document.getElementById("userAvatar").src = "/static/avatars/" + data.avatar;
 }
-fetch("http://127.0.0.1:5000/api/auth/login", {
+fetch("/api/auth/login", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ idToken }),
@@ -936,7 +936,7 @@ fetch("api/recipient", { credentials: "include" })
 loadUser();
 async function checkLoginStatus() {
   try {
-    let response = await fetch("http://127.0.0.1:5000/api/auth/status", {
+    let response = await fetch("/api/auth/status", {
       method: "GET",
       credentials: "include" // 🔑 sends Flask session cookie
     });
@@ -963,7 +963,7 @@ async function checkLoginStatus() {
  document.getElementById("logoutBtn").addEventListener("click", logout);
  
 window.onload = checkLoginStatus;
-fetch("http://localhost:5000/api/protected", {
+fetch("/api/protected", {
   method: "GET",
   credentials: "include"   // IMPORTANT
 })
@@ -971,7 +971,7 @@ fetch("http://localhost:5000/api/protected", {
 .then(data => console.log(data));
 async function logout() {
   try {
-    let response = await fetch("http://127.0.0.1:5000/api/auth/logout", {
+    let response = await fetch("/api/auth/logout", {
       method: "POST",
       credentials: "include" // 🔑 required to clear Flask session cookie
     });

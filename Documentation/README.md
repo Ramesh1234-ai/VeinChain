@@ -341,3 +341,155 @@ Firebase config loaded from `firebase_config.json` in Backend folder (optional, 
 ## Running the Application
 
 ### Backend Setup
+```bash
+cd Backend
+pip install -r requirements.txt
+python app.py
+```
+
+Backend runs on `http://localhost:5000`
+
+### Frontend Setup
+Frontend is served from Backend's template folder at:
+- `http://localhost:5000/` (home)
+- `http://localhost:5000/login.html`
+- `http://localhost:5000/register.html`
+- etc.
+
+### Database Initialization
+Database is auto-created on first run via SQLAlchemy `db.create_all()` in app.py
+
+## File Structure
+
+```
+VeinChain/
+├── Backend/
+│   ├── app.py                 # Main Flask application
+│   ├── config.py              # Configuration settings
+│   ├── database.py            # Database models
+│   ├── models.py              # Alternative models file
+│   ├── dashboard.py           # Dashboard logic
+│   ├── admin.py               # Admin functions
+│   ├── firebase_config.json   # Firebase credentials (optional)
+│   ├── requirements.txt       # Python dependencies
+│   └── scripts/
+│       └── list_users.py      # Utility script
+│
+├── Frontend/
+│   ├── templates/
+│   │   ├── index.html              # Home page
+│   │   ├── login.html              # Login form
+│   │   ├── register.html           # Registration form
+│   │   ├── dashboard.html          # Donor dashboard
+│   │   ├── Recipent.html           # Recipient/Blood Request form
+│   │   ├── Contact Us.html         # Contact form
+│   │   ├── adminPanel.html         # Admin approval panel
+│   │   ├── Payment.html            # Payment page
+│   │   ├── about.html              # About page
+│   │   ├── Notifiicans.html        # Notifications
+│   │   └── Matching System.html    # Blood matching
+│   │
+│   └── static/
+│       ├── js/
+│       │   ├── index.js       # Firebase & auth logic
+│       │   └── index2.js      # Additional scripts
+│       ├── css/               # Stylesheets
+│       ├── images/            # Images & assets
+│       └── components/        # Reusable components
+│
+└── README.md                  # This file
+```
+
+## Security Features
+
+1. **Password Hashing**: Werkzeug's `generate_password_hash()` & `check_password_hash()`
+2. **JWT Tokens**: Token-based authentication for API endpoints
+3. **Role-Based Access Control**: Admin, Donor, Recipient roles
+4. **Session Management**: Secure filesystem session storage
+5. **CORS Configuration**: Restricted to allowed origins
+6. **Token Validation**: All protected endpoints require valid JWT
+7. **Firebase Auth**: Optional Firebase integration for OAuth
+
+## Email Notifications
+
+The system sends automated emails for:
+- New user registration
+- Blood donation recorded
+- Blood request submitted
+- Admin approval/rejection actions
+
+**Configuration Required**:
+- Gmail account with app-specific password
+- `EMAIL_USER` and `EMAIL_PASS` environment variables
+
+## Known Endpoints Connections
+
+### Fully Connected ✅
+- Login form → `/api/auth/login` → User table
+- Registration → `/api/auth/register` → User + Donor tables
+- Blood Request → `/api/blood-requests` → BloodRequest table
+- Donation → `/api/donations` → Donation + Donor tables
+- Contact → `/api/contact` → ContactMessage table
+- Admin Approve/Reject → `/admin/*` → Donor + BloodRequest tables
+
+### Notifications ✅
+- Email notifications via Gmail SMTP
+- Database notifications in Notification table
+- Frontend notification retrieval via `/api/notifications`
+
+## Testing Forms
+
+1. **Register** → Go to `/register.html`, fill form, submit
+2. **Login** → Go to `/login.html`, enter credentials
+3. **Request Blood** → Login as recipient, go to `/Recipent.html`, submit request
+4. **Donate** → Login as donor, go to `/dashboard.html`, submit donation
+5. **Contact** → Go to `/Contact Us.html`, submit message
+6. **Admin Panel** → Login as admin, go to `/adminPanel.html`, approve/reject
+
+## Dependencies
+
+### Backend
+- Flask==2.3.0
+- Flask-CORS==4.0.0
+- Flask-SQLAlchemy==3.0.0
+- Flask-Session==0.4.0
+- Flask-JWT-Extended==4.4.0
+- firebase-admin==5.3.0
+- Werkzeug==2.3.0
+- Pillow==9.5.0
+- python-dotenv==1.0.0
+
+### Frontend
+- Firebase SDK (loaded from CDN)
+- Font Awesome (loaded from CDN)
+- Animate.css (loaded from CDN)
+
+## Future Enhancements
+
+1. Email verification for new users
+2. Two-factor authentication
+3. Blood inventory management
+4. Donor-Recipient matching algorithm
+5. Payment gateway integration
+6. Mobile app (React Native/Flutter)
+7. Advanced analytics dashboard
+8. Geolocation-based matching
+9. Blood bank integration
+10. Medical history tracking
+
+## Support & Documentation
+
+For detailed API documentation, see inline comments in Backend and Frontend files.
+
+## License
+
+This project is part of the VeinChain Blood Donation Management System.
+
+## Contact
+
+For issues or contributions, contact the development team.
+
+---
+
+**Last Updated**: January 9, 2026
+**Status**: All forms connected to backend and database ✅

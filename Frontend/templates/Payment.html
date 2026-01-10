@@ -1164,7 +1164,7 @@ payButton.addEventListener('click', (e) => {
 });
 
 // Function to send confirmation email via the server
-fetch('http://127.0.0.1:5000/api/send-confirmation-email', {
+fetch('/api/send-confirmation-email', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'

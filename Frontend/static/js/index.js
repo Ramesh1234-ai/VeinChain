@@ -4,19 +4,18 @@
   import { getAuth,GoogleAuthProvider,signInWithPopup } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyC-qpHsdrhqqMG8OawXDqOj5a-cVGd9Hg0",
-    authDomain: "flask-backend-52f1f.firebaseapp.com",
-    projectId: "flask-backend-52f1f",
-    storageBucket: "flask-backend-52f1f.firebasestorage.app",
-    messagingSenderId: "921295611495",
-    appId: "1:921295611495:web:7d44911069f2ba06e456c2",
-    measurementId: "G-E13TSKHV4X"
+  
+  // IMPORTANT: Move Firebase config to Backend/.env or Backend/firebase_config.json
+  // DO NOT store credentials in frontend code
+  // Load from backend API or environment variables
+  const firebaseConfig = window.FIREBASE_CONFIG || {
+    apiKey: "REPLACE_WITH_YOUR_API_KEY",
+    authDomain: "REPLACE_WITH_YOUR_AUTH_DOMAIN",
+    projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
+    storageBucket: "REPLACE_WITH_YOUR_STORAGE_BUCKET",
+    messagingSenderId: "REPLACE_WITH_YOUR_SENDER_ID",
+    appId: "REPLACE_WITH_YOUR_APP_ID",
+    measurementId: "REPLACE_WITH_YOUR_MEASUREMENT_ID"
   };
 
   // Initialize Firebase
@@ -33,19 +32,19 @@ googlelogin.addEventListener("click", async () => {
         const user = result.user;
         const idToken = await user.getIdToken();
 
-        const res = await fetch("http://127.0.0.1:5000/verify_token", {
+        const res = await fetch("/api/auth/firebase-login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: idToken })
+            body: JSON.stringify({ idToken: idToken })
         });
 
         const data = await res.json();
         console.log("Backend verified:", data);
 
-        if (data.status === "success") {
-            window.location.href = "index.html"; // Flask route
+        if (data.success) {
+            window.location.href = "dashboard.html";
         } else {
-            alert("Login failed: " + data.message);
+            alert("Login failed: " + (data.message || data.error));
         }
     } catch (error) {
         console.error("Error during login:", error);

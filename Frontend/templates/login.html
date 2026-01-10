@@ -629,7 +629,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     }
 
     try {
-        const res = await fetch('http://127.0.0.1:5000/api/auth/login', {
+        const res = await fetch('/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -661,11 +661,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         alert('Network or server error.');
     }
 });
-await addDoc(collection(db, "messages"), {
-        name,
-        message,
-        timestamp: new Date()
-      });
 </script>
 </body>
 </html>

@@ -16,6 +16,7 @@ load_dotenv()
 # Import database and config
 from database import db
 from config import get_config
+from routes import auth_bp
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -77,6 +78,9 @@ def create_app(config=None):
     
     # Store generate_avatar in app context
     app.generate_avatar = generate_avatar
+    
+    # Register blueprints
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
     
     # Frontend routes
     @app.route('/')
