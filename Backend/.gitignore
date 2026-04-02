@@ -5,4 +5,4 @@ __pycache__/
 Backend/firebase_config.json
 firebase_config.json
 .vscode
-flask_session/
+flask_session
