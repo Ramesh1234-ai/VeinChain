@@ -10,7 +10,7 @@ firebase-admin==6.2.0
 Werkzeug==3.0.0
 gunicorn==21.2.0
 psycopg2-binary==2.9.9
-PyJWT==2.8.1
+PyJWT==2.12.1
 cryptography==41.0.7
 requests==2.31.0
 Pillow==10.1.0
