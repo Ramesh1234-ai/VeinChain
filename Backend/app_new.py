@@ -9,20 +9,15 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_session import Session
 from dotenv import load_dotenv
-
 # Load environment variables
 load_dotenv()
-
 # Import database and config
 from database import db
 from config import get_config
 from routes import auth_bp
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
 def generate_avatar(name):
     """Generate avatar URL using initials"""
     try:
@@ -125,11 +120,8 @@ def create_app(config=None):
     logger.info(f"App created with config: {config.__name__}")
     
     return app
-
-
 # Create app instance for Gunicorn/Railway
 app = create_app()
-
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     debug = os.getenv('DEBUG', 'False').lower() == 'true'

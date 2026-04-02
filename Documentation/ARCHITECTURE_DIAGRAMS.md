@@ -100,9 +100,7 @@
 │                                                                               │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
-
 ---
-
 ## 🔄 Form Submission Workflow Diagrams
 
 ### 1. LOGIN FORM FLOW
@@ -420,11 +418,8 @@ Success           Error
     │           │  │  notif... │  │             │
     └───────────┘  └───────────┘  └─────────────┘
 ```
-
 ---
-
 ## 🔐 Authentication & Token Flow
-
 ```
 ┌──────────────────────────────────────────────────────────┐
 │ User Login Request                                       │
@@ -482,7 +477,6 @@ Success           Error
 ---
 
 ## 📊 Database Relationship Diagram
-
 ```
 ┌───────────────────┐
 │   User Table      │
@@ -532,9 +526,7 @@ Success           Error
         (FK) Foreign Key
         ──┤ One-to-Many
 ```
-
 ---
-
 ## 🔄 Admin Approval Workflow
 
 ```
@@ -656,9 +648,7 @@ User Action              Frontend              Network           Backend        
    login                  arrives                                                      │         in inbox
                                                                                        │
 ```
-
 ---
-
 This comprehensive architecture shows how all components of VeinChain work together:
 - **Frontend** collects user input
 - **Backend** validates and processes requests
@@ -666,7 +656,5 @@ This comprehensive architecture shows how all components of VeinChain work toget
 - **Email** notifies users
 - **Authentication** secures the system
 - **Authorization** controls access by role
-
 ---
-
 *All systems operational as of January 9, 2026*

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,23 +19,23 @@
             --danger: #e74c3c;
             --gray: #6c757d;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
             background-color: #f5f5f5;
         }
-        
+
         .container {
             display: flex;
             min-height: 100vh;
         }
-        
+
         /* Sidebar */
         .sidebar {
             width: 250px;
@@ -45,28 +46,28 @@
             height: 100vh;
             z-index: 100;
         }
-        
+
         .sidebar-header {
             padding: 20px;
             text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .sidebar-logo {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
         }
-        
+
         .sidebar-logo i {
             font-size: 24px;
         }
-        
+
         .nav-menu {
             padding: 15px 0;
         }
-        
+
         .nav-item {
             padding: 12px 20px;
             display: flex;
@@ -77,37 +78,38 @@
             transition: all 0.3s ease;
             border-left: 3px solid transparent;
         }
-        
-        .nav-item:hover, .nav-item.active {
-            background-color: rgba(255,255,255,0.1);
+
+        .nav-item:hover,
+        .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
             border-left: 3px solid white;
         }
-        
+
         /* Main Content */
         .main-content {
             flex: 1;
             margin-left: 250px;
             transition: all 0.3s ease;
         }
-        
+
         .header {
             background-color: white;
             padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
             z-index: 99;
         }
-        
+
         .header-left {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-        
+
         .toggle-sidebar {
             background: none;
             border: none;
@@ -116,18 +118,18 @@
             cursor: pointer;
             display: none;
         }
-        
+
         .header-right {
             display: flex;
             align-items: center;
             gap: 20px;
         }
-        
+
         .notification-bell {
             position: relative;
             cursor: pointer;
         }
-        
+
         .notification-count {
             position: absolute;
             top: -5px;
@@ -142,14 +144,14 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .user-profile {
             display: flex;
             align-items: center;
             gap: 10px;
             cursor: pointer;
         }
-        
+
         .user-avatar {
             width: 36px;
             height: 36px;
@@ -161,49 +163,49 @@
             justify-content: center;
             font-weight: bold;
         }
-        
+
         /* Page Content */
         .page-content {
             padding: 20px;
             animation: fadeIn 0.5s ease;
         }
-        
+
         .page-title {
             margin-bottom: 20px;
         }
-        
+
         .page-title h1 {
             font-size: 24px;
             color: var(--dark);
             margin-bottom: 5px;
         }
-        
+
         .breadcrumb {
             display: flex;
             gap: 5px;
             color: var(--gray);
             font-size: 14px;
         }
-        
+
         .breadcrumb a {
             color: var(--primary);
             text-decoration: none;
         }
-        
+
         .card {
             background-color: white;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             margin-bottom: 20px;
             overflow: hidden;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        
+
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-        
+
         .card-header {
             padding: 15px 20px;
             border-bottom: 1px solid #eee;
@@ -211,30 +213,30 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .card-body {
             padding: 20px;
         }
-        
+
         /* Form Styles */
         .form-row {
             display: flex;
             flex-wrap: wrap;
             margin: -10px;
         }
-        
+
         .form-group {
             flex: 1;
             min-width: 200px;
             padding: 10px;
         }
-        
+
         .form-label {
             display: block;
             margin-bottom: 5px;
             font-weight: 500;
         }
-        
+
         .form-control {
             width: 100%;
             padding: 10px;
@@ -242,16 +244,16 @@
             border-radius: 4px;
             transition: border-color 0.3s;
         }
-        
+
         .form-control:focus {
             border-color: var(--primary);
             outline: none;
         }
-        
+
         .input-with-icon {
             position: relative;
         }
-        
+
         .input-with-icon i {
             position: absolute;
             left: 10px;
@@ -259,11 +261,11 @@
             transform: translateY(-50%);
             color: var(--gray);
         }
-        
+
         .input-with-icon .form-control {
             padding-left: 35px;
         }
-        
+
         /* Blood Type Selector */
         .blood-type-selector {
             display: flex;
@@ -271,16 +273,16 @@
             gap: 10px;
             margin-top: 10px;
         }
-        
+
         .blood-type-option {
             position: relative;
         }
-        
+
         .blood-type-option input[type="radio"] {
             position: absolute;
             opacity: 0;
         }
-        
+
         .blood-type-option label {
             display: block;
             width: 50px;
@@ -292,13 +294,13 @@
             transition: all 0.3s;
             font-weight: bold;
         }
-        
-        .blood-type-option input[type="radio"]:checked + label {
+
+        .blood-type-option input[type="radio"]:checked+label {
             border-color: var(--primary);
             background-color: rgba(231, 76, 60, 0.1);
             color: var(--primary);
         }
-        
+
         /* Button Styles */
         .btn {
             display: inline-block;
@@ -309,59 +311,60 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        
+
         .btn-primary {
             background-color: var(--primary);
             color: white;
         }
-        
+
         .btn-primary:hover {
             background-color: var(--primary-dark);
         }
-        
+
         .btn-outline {
             background-color: transparent;
             border: 1px solid var(--primary);
             color: var(--primary);
         }
-        
+
         .btn-outline:hover {
             background-color: var(--primary);
             color: white;
         }
-        
+
         .form-actions {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
             margin-top: 20px;
         }
-        
+
         /* Table Styles */
         .table {
             width: 100%;
             border-collapse: collapse;
         }
-        
-        .table th, .table td {
+
+        .table th,
+        .table td {
             padding: 12px 15px;
             border-bottom: 1px solid #eee;
             text-align: left;
         }
-        
+
         .table th {
             font-weight: 500;
             color: var(--gray);
         }
-        
+
         .table tbody tr {
             transition: background-color 0.3s;
         }
-        
+
         .table tbody tr:hover {
-            background-color: rgba(0,0,0,0.02);
+            background-color: rgba(0, 0, 0, 0.02);
         }
-        
+
         /* Status Badge */
         .badge {
             display: inline-block;
@@ -370,27 +373,27 @@
             font-size: 12px;
             font-weight: 500;
         }
-        
+
         .badge-pending {
             background-color: rgba(243, 156, 18, 0.1);
             color: var(--warning);
         }
-        
+
         .badge-approved {
             background-color: rgba(46, 204, 113, 0.1);
             color: var(--success);
         }
-        
+
         .badge-fulfilled {
             background-color: rgba(52, 152, 219, 0.1);
             color: var(--secondary);
         }
-        
+
         .badge-rejected {
             background-color: rgba(231, 76, 60, 0.1);
             color: var(--danger);
         }
-        
+
         /* Toast Notification */
         .toast-container {
             position: fixed;
@@ -398,75 +401,95 @@
             right: 20px;
             z-index: 1000;
         }
-        
+
         .toast {
             display: flex;
             align-items: center;
             padding: 15px;
             background-color: white;
             border-radius: 4px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             margin-bottom: 10px;
             animation: slideIn 0.3s forwards;
             max-width: 350px;
         }
-        
+
         .toast-icon {
             margin-right: 15px;
             font-size: 20px;
         }
-        
+
         .toast-success .toast-icon {
             color: var(--success);
         }
-        
+
         .toast-error .toast-icon {
             color: var(--danger);
         }
-        
+
         .toast-title {
             font-weight: 500;
             margin-bottom: 5px;
         }
-        
+
         .toast-message {
             color: var(--gray);
             font-size: 14px;
         }
-        
+
         /* Animations */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
+
         @keyframes slideIn {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
         }
-        
+
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
-        
+
         .pulse {
             animation: pulse 1.5s infinite;
         }
-        
+
         .fade-in {
             animation: fadeIn 0.5s forwards;
         }
-        
+
         .delay-1 {
             animation-delay: 0.1s;
         }
-        
+
         .delay-2 {
             animation-delay: 0.2s;
         }
-        
+
         /* Modal */
         .modal-overlay {
             position: fixed;
@@ -474,7 +497,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -483,12 +506,12 @@
             visibility: hidden;
             transition: all 0.3s;
         }
-        
+
         .modal-overlay.active {
             opacity: 1;
             visibility: visible;
         }
-        
+
         .modal {
             background-color: white;
             border-radius: 8px;
@@ -497,11 +520,11 @@
             transform: translateY(20px);
             transition: all 0.3s;
         }
-        
+
         .modal-overlay.active .modal {
             transform: translateY(0);
         }
-        
+
         .modal-header {
             padding: 15px 20px;
             border-bottom: 1px solid #eee;
@@ -509,7 +532,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .modal-close {
             background: none;
             border: none;
@@ -517,58 +540,61 @@
             cursor: pointer;
             color: var(--gray);
         }
-        
+
         .modal-body {
             padding: 20px;
         }
+
         /* Responsive */
         @media (max-width: 991px) {
             .sidebar {
                 width: 70px;
             }
-            
-            .sidebar-logo h3, .nav-item span {
+
+            .sidebar-logo h3,
+            .nav-item span {
                 display: none;
             }
-            
+
             .main-content {
                 margin-left: 70px;
             }
         }
-        
+
         @media (max-width: 767px) {
             .toggle-sidebar {
                 display: block;
             }
-            
+
             .sidebar {
                 transform: translateX(-100%);
             }
-            
+
             .sidebar.active {
                 transform: translateX(0);
                 width: 250px;
             }
-            
+
             .sidebar.active .sidebar-logo h3,
             .sidebar.active .nav-item span {
                 display: block;
             }
-            
+
             .main-content {
                 margin-left: 0;
             }
-            
+
             .form-row {
                 flex-direction: column;
             }
         }
     </style>
 </head>
+
 <body>
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
-    
+
     <!-- Modal -->
     <div class="modal-overlay" id="viewRequestModal">
         <div class="modal">
@@ -591,7 +617,7 @@
                     <h3>BloodConnect</h3>
                 </div>
             </div>
-            
+
             <div class="nav-menu">
                 <a href="login.html" class="nav-item">
                     <i class="fas fa-chart-line"></i>
@@ -619,7 +645,7 @@
                 </a>
             </div>
         </div>
-        
+
         <!-- Main Content -->
         <div class="main-content">
             <!-- Header -->
@@ -630,25 +656,22 @@
                     </button>
                     <h2>Blood Donation Management</h2>
                 </div>
-                
+
                 <div class="header-right">
                     <div class="notification-bell">
                         <i class="fas fa-bell"></i>
                         <span class="notification-count">3</span>
                     </div>
-                    
-                        <div class="user-profile">
-                            <div class="user-info">
-                           <img src="{{ url_for('static', filename='avatars/' ~ avatar) }}" 
-                            alt="User Avatar" 
-                            width="50" height="50">
-                            <span>{{ username }}</span>
-</div>
-                          <button id="logoutBtn">Logout</button>
+
+                    <div class="user-profile">
+                        <div class="user-info">
+                            <span>{{username}}</span>
                         </div>
+                        <button id="logoutBtn">Logout</button>
+                    </div>
                 </div>
             </div>
-            
+
             <!-- Page Content -->
             <div class="page-content">
                 <!-- Page Title -->
@@ -660,7 +683,7 @@
                         <span>Recipient Requests</span>
                     </div>
                 </div>
-                
+
                 <!-- Request Form Card -->
                 <div class="card fade-in delay-1">
                     <div class="card-header">
@@ -676,7 +699,7 @@
                                         <input type="text" class="form-control" id="patientName" required>
                                     </div>
                                 </div>
-                                
+
                                 <div class="form-group">
                                     <label class="form-label">Hospital/Clinic</label>
                                     <div class="input-with-icon">
@@ -685,7 +708,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Contact Number</label>
@@ -694,7 +717,7 @@
                                         <input type="tel" class="form-control" id="contactNumber" required>
                                     </div>
                                 </div>
-                                
+
                                 <div class="form-group">
                                     <label class="form-label">Required Date</label>
                                     <div class="input-with-icon">
@@ -703,7 +726,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Blood Type Required</label>
@@ -742,21 +765,22 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="form-group">
                                     <label class="form-label">Units Required</label>
                                     <div class="input-with-icon">
                                         <i class="fas fa-tint"></i>
-                                        <input type="number" class="form-control" id="unitsRequired" min="1" value="1" required>
+                                        <input type="number" class="form-control" id="unitsRequired" min="1" value="1"
+                                            required>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="form-label">Reason/Purpose</label>
                                 <textarea class="form-control" id="purpose" rows="3"></textarea>
                             </div>
-                            
+
                             <div class="form-actions">
                                 <button type="button" class="btn btn-outline" id="resetBtn">Reset</button>
                                 <button type="submit" class="btn btn-primary" id="submitBtn">
@@ -810,7 +834,7 @@
                 createdAt: '2025-02-20'
             }
         ];
-        
+
         // DOM Elements
         const sidebar = document.getElementById('sidebar');
         const toggleSidebarBtn = document.getElementById('toggleSidebar');
@@ -822,32 +846,32 @@
         const viewRequestModal = document.getElementById('viewRequestModal');
         const closeModalBtn = document.getElementById('closeModal');
         const modalContent = document.getElementById('modalContent');
-        
+
         //
         document.addEventListener("DOMContentLoaded", () => {
-    const requestsTableElement = document.getElementById('requestsTable');
-    if (requestsTableElement) {
-        const requestsTable = requestsTableElement.querySelector('tbody');
-        populateRequestsTable();
-    } else {
-        console.warn("Element with ID 'requestsTable' not found.");
-    }
-});
+            const requestsTableElement = document.getElementById('requestsTable');
+            if (requestsTableElement) {
+                const requestsTable = requestsTableElement.querySelector('tbody');
+                populateRequestsTable();
+            } else {
+                console.warn("Element with ID 'requestsTable' not found.");
+            }
+        });
         // Toggle Sidebar
         toggleSidebarBtn.addEventListener('click', () => {
             sidebar.classList.toggle('active');
         });
-        
+
         // Close Modal
         closeModalBtn.addEventListener('click', () => {
             viewRequestModal.classList.remove('active');
         });
-        
+
         // Display Toast Notification
         function showToast(type, title, message) {
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            
+
             toast.innerHTML = `
                 <div class="toast-icon">
                     <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
@@ -857,9 +881,9 @@
                     <div class="toast-message">${message}</div>
                 </div>
             `;
-            
+
             toastContainer.appendChild(toast);
-            
+
             // Remove toast after 5 seconds
             setTimeout(() => {
                 toast.style.opacity = '0';
@@ -868,14 +892,14 @@
                 }, 300);
             }, 5000);
         }
-        
+
         // Populate Requests Table
         function populateRequestsTable() {
             requestsTable.innerHTML = '';
-            
+
             requests.forEach(request => {
                 const row = document.createElement('tr');
-                
+
                 row.innerHTML = `
                     <td>${request.id}</td>
                     <td>${request.patient}</td>
@@ -889,111 +913,111 @@
                         </button>
                     </td>
                 `;
-                
+
                 requestsTable.appendChild(row);
             });
-            
+
             // Add event listeners to view buttons
             document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function () {
                     const requestId = this.getAttribute('data-id');
                     viewRequestDetails(requestId);
                 });
             });
         }
-      async function loadUser() {
-    // First try localStorage (instant update)
-    
-    if (!data.error) {
-       document.getElementById("username").innerText = data.user.name || "Guest";
-       document.getElementById("avatar").src = data.user.avatar || "/static/default-avatar.png";
-}
+        async function loadUser() {
+            // First try localStorage (instant update)
+
+            if (!data.error) {
+                document.getElementById("username").innerText = data.user.name || "Guest";
+                document.getElementById("avatar").src = data.user.avatar || "/static/default-avatar.png";
+            }
 
 
-    // Fallback to server session
-    const response = await fetch("/api/user");
-    const data = await response.json();
-    document.getElementById("userName").textContent = data.username;
-    document.getElementById("userAvatar").src = "/static/avatars/" + data.avatar;
-}
-fetch("/api/auth/login", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ idToken }),
-  credentials: "include"   // 🔑 super important
-})
+            // Fallback to server session
+            const response = await fetch("/api/user");
+            const data = await response.json();
+            document.getElementById("userName").textContent = data.username;
+            document.getElementById("userAvatar").src = "/static/avatars/" + data.avatar;
+        }
+        fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ idToken }),
+            credentials: "include"   // 🔑 super important
+        })
 
-fetch("api/recipient", { credentials: "include" })
-  .then(res => res.json())
-  .then(data => {
-    if (!data.error) {
-      document.getElementById("username").innerText = data.name;
-      document.getElementById("avatar").src = data.avatar;
-    }
-  });
-
-
-loadUser();
-async function checkLoginStatus() {
-  try {
-    let response = await fetch("/api/auth/status", {
-      method: "GET",
-      credentials: "include" // 🔑 sends Flask session cookie
-    });
-
-    let data = await response.json();
-
-    if (response.ok && data.logged_in) {
-      console.log("✅ User is logged in:", data.user);
-
-      // Safely update DOM only if elements exist
-      const usernameEl = document.getElementById("username");
-      const avatarEl = document.getElementById("avatar");
-
-      if (usernameEl) usernameEl.innerText = data.user.name || "Guest";
-      if (avatarEl) avatarEl.src = data.user.avatar || "/static/default.png";
-    } else {
-      console.warn("❌ Not logged in");
-      window.location.href = "/login.html"; // redirect to login
-    }
-  } catch (err) {
-    console.error("⚠️ Error checking login:", err);
-  }
-}
- document.getElementById("logoutBtn").addEventListener("click", logout);
- 
-window.onload = checkLoginStatus;
-fetch("/api/protected", {
-  method: "GET",
-  credentials: "include"   // IMPORTANT
-})
-.then(res => res.json())
-.then(data => console.log(data));
-async function logout() {
-  try {
-    let response = await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include" // 🔑 required to clear Flask session cookie
-    });
-
-    if (response.ok) {
-      console.log("✅ Logged out successfully");
-      // Optionally clear UI
-      document.getElementById("username").innerText = "";
-      document.getElementById("avatar").src = "/static/default.png";
-
-      // Redirect to login page
-      window.location.href = "/login.html";
-    } else {
-      console.error("❌ Logout failed:", await response.json());
-    }
-  } catch (err) {
-    console.error("⚠️ Error during logout:", err);
-  }
-}
+        fetch("api/recipient", { credentials: "include" })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.error) {
+                    document.getElementById("username").innerText = data.name;
+                    document.getElementById("avatar").src = data.avatar;
+                }
+            });
 
 
-      </script>
+        loadUser();
+        async function checkLoginStatus() {
+            try {
+                let response = await fetch("/api/auth/status", {
+                    method: "GET",
+                    credentials: "include" // 🔑 sends Flask session cookie
+                });
+
+                let data = await response.json();
+
+                if (response.ok && data.logged_in) {
+                    console.log("✅ User is logged in:", data.user);
+
+                    // Safely update DOM only if elements exist
+                    const usernameEl = document.getElementById("username");
+                    const avatarEl = document.getElementById("avatar");
+
+                    if (usernameEl) usernameEl.innerText = data.user.name || "Guest";
+                    if (avatarEl) avatarEl.src = data.user.avatar || "/static/default.png";
+                } else {
+                    console.warn("❌ Not logged in");
+                    window.location.href = "/login.html"; // redirect to login
+                }
+            } catch (err) {
+                console.error("⚠️ Error checking login:", err);
+            }
+        }
+        document.getElementById("logoutBtn").addEventListener("click", logout);
+
+        window.onload = checkLoginStatus;
+        fetch("/api/protected", {
+            method: "GET",
+            credentials: "include"   // IMPORTANT
+        })
+            .then(res => res.json())
+            .then(data => console.log(data));
+        async function logout() {
+            try {
+                let response = await fetch("/api/auth/logout", {
+                    method: "POST",
+                    credentials: "include" // 🔑 required to clear Flask session cookie
+                });
+
+                if (response.ok) {
+                    console.log("✅ Logged out successfully");
+                    // Optionally clear UI
+                    document.getElementById("username").innerText = "";
+                    document.getElementById("avatar").src = "/static/default.png";
+
+                    // Redirect to login page
+                    window.location.href = "/login.html";
+                } else {
+                    console.error("❌ Logout failed:", await response.json());
+                }
+            } catch (err) {
+                console.error("⚠️ Error during logout:", err);
+            }
+        }
+
+
+    </script>
 </body>
+
 </html>
-            

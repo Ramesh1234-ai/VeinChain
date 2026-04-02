@@ -9,9 +9,6 @@ import os
 from werkzeug.security import check_password_hash
 import logging
 import os
-
-
-
 # Debugging: Check if templates folder is correctly set
 app = Flask(__name__, template_folder="Frontend/templates")
 print("app.root_path =", app.root_path)
@@ -437,7 +434,6 @@ def login():
         if connection and connection.is_connected():
             cursor.close()
             connection.close()
-
 def get_stock_status(units):
     """Determine stock status based on unit count"""
     if units < 5:
@@ -446,7 +442,6 @@ def get_stock_status(units):
         return 'warning'
     else:
         return 'healthy'
-
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
@@ -456,20 +451,16 @@ def health_check():
         return jsonify({'status': 'healthy', 'database': 'connected'})
     else:
         return jsonify({'status': 'unhealthy', 'database': 'disconnected'}), 500
-
 # Error handlers
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({'error': 'Endpoint not found'}), 404
-
 @app.errorhandler(500)
 def internal_error(error):
     return jsonify({'error': 'Internal server error'}), 500
-
 @app.route("/_ping")
 def _ping():
     return "ok"
-
 if __name__ == '__main__':
     # Initialize database on startup
     if init_database():
@@ -478,4 +469,3 @@ if __name__ == '__main__':
     else:
         logger.error("Failed to initialize database. Exiting.")
         exit(1)
-

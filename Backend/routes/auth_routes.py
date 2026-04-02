@@ -92,3 +92,80 @@ def auth_status():
     """Check authentication status"""
     # This is handled by JWT, only accessible with valid token
     return jsonify({'authenticated': True}), 200
+@app.route('/api/auth/firebase-login', methods=['POST'])
+def firebase_login():
+    """Login using Firebase ID token."""
+    if not FIREBASE_ENABLED:
+        return jsonify({
+            'error': 'Firebase not configured',
+            'message': 'Place service account JSON at Backend/firebase_config.json'
+        }), 503
+    
+    try:
+        data = request.get_json()
+        id_token = data.get('idToken')
+        
+        if not id_token:
+            return jsonify({'error': 'Missing Firebase token'}), 400
+        
+        # Verify token with Firebase
+        decoded_token = auth.verify_id_token(id_token)
+        email = decoded_token['email']
+        name = decoded_token.get('name', email.split("@")[0])
+        
+        # Fetch or create user
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            user = User(
+                id=str(uuid.uuid4()),
+                name=name,
+                email=email,
+                username=email.split("@")[0],
+                role='donor',
+                auth_method='firebase'
+            )
+            db.session.add(user)
+            db.session.commit()
+            logger.info(f"New Firebase user created: {email}")
+        
+        # Generate JWT token for frontend
+        access_token = create_access_token(identity=user.id)
+        
+        # Store in session
+        session['user'] = {
+            'id': user.id,
+            'name': user.name,
+            'email': user.email,
+            'role': user.role
+        }
+        
+        # Send notification
+        send_notification(user, f"Welcome {user.name}! You logged in via Firebase.")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Firebase login successful',
+            'access_token': access_token,
+            'user': user.to_dict()
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Firebase login failed: {e}", exc_info=True)
+        return jsonify({'error': 'Firebase login failed'}), 400
+@app.route("/api/auth/status")
+def auth_status():
+    """Check authentication status."""
+    if "user" in session:
+        return jsonify({
+            "logged_in": True,
+            "user": session["user"]
+        }), 200
+    else:
+        return jsonify({"logged_in": False}), 401
+
+@app.route("/api/auth/logout", methods=["POST"])
+def logout():
+    """Logout user."""
+    session.clear()
+    logger.info("User logged out")
+    return jsonify({"message": "Logged out successfully"}), 200

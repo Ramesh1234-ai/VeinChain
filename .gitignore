@@ -13,3 +13,6 @@ __pycache__/
 .DS_Store
 .venv/
 venv/
+flask_session/
+Frontend/.vercel/
+Frontend/templates/.vercel/

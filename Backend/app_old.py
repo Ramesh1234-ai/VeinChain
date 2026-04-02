@@ -214,198 +214,38 @@ def login():
         }), 200
     
     return jsonify({'error': 'Invalid credentials'}), 401
-
-#------------------------- #
-# Firebase Login Route
-@app.route('/api/auth/firebase-login', methods=['POST'])
-def firebase_login():
-    """
-    Frontend sends: { idToken: <Firebase ID Token> }
-    """
-    if not FIREBASE_ENABLED:
-        return jsonify({'success': False, 'message': f'Firebase not configured. Place service account JSON at: {cred_path}'}), 500
-    data = request.get_json()
-    id_token = data.get('idToken')
-    if not id_token:
-        return jsonify({'message': 'Missing Firebase token'}), 400
-
-    try:
-        # 1. Verify token
-        decoded_token = auth.verify_id_token(id_token)
-        email = decoded_token['email']
-        name = decoded_token.get('name', email.split("@")[0])
-
-        # 2. Fetch or create user in DB
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            user = User(
-                id=str(uuid.uuid4()),
-                name=name,
-                email=email,
-
-                role='user',
-                password=""   # because Firebase manages auth
-            )
-            db.session.add(user)
-            db.session.commit()
-
-        # 3. Store in session (now user is defined ✅)
-        avatar_url = getattr(user, "avatar_url", None) or generate_avatar(user.name)
-        session["user"] = {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email,
-            "avatar": avatar_url
-        }
-
-        # 4. Send notification
-        send_notification(user, f"Hello {user.name}, you just logged in via Firebase successfully!")
-
-        # 5. Generate JWT token for frontend
-        token = jwt.encode({
-            'user_id': user.id,
-            'email': user.email,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
-        }, SECRET_KEY)
-
-        return jsonify({
-            'success': True,
-            'method': 'firebase',
-            'token': token,
-            'user': session["user"]
-        })
-
-    except Exception as e:
-        return jsonify({'success': False, 'message': f'Firebase login failed: {e}'}), 400
-# ------------------------- #
-# Donations & Blood Requests
-# ------------------------- #
-@app.route('/api/donations', methods=['POST'])
-@token_required
-def create_donation(current_user):
-    if current_user.role != 'donor':
-        return jsonify({'message': 'Not authorized'}), 403
-    data = request.get_json()
-    new_donation = Donation(
-        id=str(uuid.uuid4()),
-        donor_id=current_user.id,
-        donation_date=datetime.datetime.now(),
-        blood_type=data['blood_type'],
-        quantity=data['quantity'],
-        location=data['location'],
-        notes=data.get('notes', '')
-    )
-    donor = Donor.query.filter_by(user_id=current_user.id).first()
-    if donor:
-        donor.last_donation_date = datetime.datetime.now()
-    db.session.add(new_donation)
-    db.session.commit()
-    send_notification(current_user, f"Thanks {current_user.name}! Your donation of {new_donation.quantity}ml {new_donation.blood_type} has been recorded.")
-    return jsonify({'message': 'Donation recorded'}), 201
-
-@app.route('/api/blood-requests', methods=['POST'])
-@token_required
-def create_blood_request(current_user):
-    data = request.get_json()
-    new_request = BloodRequest(
-        id=str(uuid.uuid4()),
-        requester_id=current_user.id,
-        blood_type=data['blood_type'],
-        quantity=data['quantity'],
-        urgency=data['urgency'],
-        hospital=data['hospital'],
-        contact_number=data['contact_number'],
-        notes=data.get('notes', ''),
-        request_date=datetime.datetime.now(),
-        status='pending'
-    )
-    db.session.add(new_request)
-    db.session.commit()
-    send_notification(current_user, f"Your request for {new_request.quantity} units of {new_request.blood_type} has been submitted.")
-    return jsonify({'message': 'Blood request created'}), 201
-
-@app.route('/api/notifications', methods=['GET'])
-@token_required
-def get_notifications(current_user):
-    notifs = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
-    return jsonify([{'id': n.id, 'message': n.message, 'created_at': n.created_at.isoformat()} for n in notifs]), 200
-
-@app.route('/api/contact', methods=['POST'])
-def submit_contact():
-    data = request.get_json() or {}
-    if not data.get('name') or not data.get('email') or not data.get('message'):
-        return jsonify({'message': 'Name, email, and message required'}), 400
-    msg = ContactMessage(
-        id=str(uuid.uuid4()),
-        name=data['name'],
-        email=data['email'],
-        phone=data.get('phone'),
-        subject=data.get('subject'),
-        message=data['message'],
-        created_at=datetime.datetime.utcnow()
-    )
-    db.session.add(msg)
-    db.session.commit()
-    return jsonify({'message': 'Contact message saved'}), 201
-
 # ------------------------- #
 # Frontend Pages
 # ------------------------- #
 @app.route('/')
 def home(): return render_template('index.html')
-
 @app.route('/<path:name>.html')
 def html_alias(name):
     try:
         return render_template(f'{name}.html')
     except:
         return ("Not Found", 404)
-
 @app.route("/dashboard")
 def dashboard():
     return render_template("DashBoard.html")
-
-
 @app.route('/about')
 def about_page(): return render_template('about.html')
-
 @app.route("/adminPanel")
 def adminPanel():
     return render_template("adminPanel.html")
-
-
 @app.route("/recipient")
 def recipient():
     try:
         if "user" not in session:
             return jsonify({"error": "User not logged in"}), 401
-
         user = session.get("user", {})
         return render_template(
             "Recipent.html",
             user=user,
             avatar_url=user.get("avatar", "/static/default-avatar.png")
         )
-
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-# ------------------------- #
-@app.route("/api/auth/status")
-def auth_status():
-    if "user" in session:
-        return jsonify({
-            "logged_in": True,
-            "user": session["user"]
-        })
-    else:
-        return jsonify({"logged_in": False}), 401
-# ------------------------- #
-@app.route("/api/auth/logout", methods=["POST"])
-def logout():
-    session.clear()  # ✅ clears the whole session safely
-    return jsonify({"message": "Logged out"}), 200
-
-# ------------------------- #
 #------------------------- #
 @app.route('/verify_token', methods=['POST'])
 def verify_token():
@@ -439,31 +279,7 @@ def protected():
     if "user" not in session:
         return jsonify({"error": "User not logged in"}), 401
     return jsonify({"message": f"Welcome {session['user']}"})
-# ------------------------- #
-@app.route("/auth/register", methods=["POST"])
-def register_donor(): 
-    data = request.json
-    if User.query.filter_by(username=data["username"]).first():
-        return jsonify({"error": "User already exists"}), 400
-    
-    user = User(username=data["username"], role=data["role"])
-    user.set_password(data["password"])
-    db.session.add(user)
-    db.session.commit()
-    return jsonify({"message": "User registered successfully"}), 201
-
-
-@app.route("/auth/login", methods=["POST"])
-def login_donor():
-    data = request.json
-    user = User.query.filter_by(username=data["username"]).first()
-    if not user or not user.check_password(data["password"]):
-        return jsonify({"error": "Invalid credentials"}), 401
-    
-    token = create_access_token(identity={"id": user.id, "role": user.role})
-    return jsonify({"access_token": token, "role": user.role}), 200
 #-------------------------- #
-
 def role_required(role):
     def wrapper(fn):
         @wraps(fn)  # ✅ preserves the original function name
@@ -475,12 +291,10 @@ def role_required(role):
             return fn(*args, **kwargs)
         return decorated_function
     return wrapper
-
 @app.route("/donor/profile", methods=["GET"])
 @role_required("donor")
 def donor_profile():
     return jsonify({"message": "Welcome Donor! Here is your profile."})
-
 @app.route("/recipient/requests", methods=["GET"])
 @role_required("recipient")
 def recipient_requests():
@@ -540,7 +354,6 @@ def reject_donor(donor_id):
     user = User.query.get(donor.user_id)
     send_notification(user, f"Your donor registration has been rejected.")
     return jsonify({"message": "Donor rejected"}), 200
-
 # Get pending blood requests
 @app.route("/admin/pending-requests", methods=["GET"])
 @role_required("admin")
@@ -558,7 +371,6 @@ def get_pending_requests():
             "notes": r.notes
         } for r in requests
     ]), 200
-
 # Approve blood request
 @app.route("/admin/approve-request/<request_id>", methods=["PUT"])
 @role_required("admin")
@@ -571,7 +383,6 @@ def approve_request(request_id):
     user = User.query.get(br.requester_id)
     send_notification(user, f"Your blood request has been approved!")
     return jsonify({"message": "Request approved"}), 200
-
 # Reject blood request
 @app.route("/admin/reject-request/<request_id>", methods=["DELETE"])
 @role_required("admin")
@@ -584,7 +395,6 @@ def reject_request(request_id):
     user = User.query.get(br.requester_id)
     send_notification(user, f"Your blood request has been rejected.")
     return jsonify({"message": "Request rejected"}), 200
-
 # ------------------------- #
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

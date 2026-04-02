@@ -1,88 +1,121 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from database import db, User, Donor, Donation
-import uuid
-import datetime
-import logging
-
-logger = logging.getLogger(__name__)
-
-donor_bp = Blueprint('donor', __name__)
-
-@donor_bp.route('/profile', methods=['GET'])
-@jwt_required()
-def get_donor_profile():
-    """Get donor's profile"""
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
+# Donor Routes
+@app.route('/api/donors', methods=['GET'])
+@role_required(['admin', 'donor'])
+def get_donors():
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 50, type=int)
+    blood_group = request.args.get('blood_group')
+    city = request.args.get('city')
     
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
+    query = Donor.query.filter_by(is_active=True)
     
-    donor = Donor.query.filter_by(user_id=user_id).first()
+    if blood_group:
+        query = query.filter_by(blood_group=blood_group)
+    if city:
+        query = query.filter_by(city=city)
     
-    if not donor:
-        return jsonify({'error': 'Donor profile not found'}), 404
+    donors = query.paginate(page=page, per_page=per_page, error_out=False)
     
     return jsonify({
-        'user': user.to_dict(),
-        'blood_type': donor.blood_type,
-        'is_available': donor.is_available,
-        'status': donor.status,
-        'last_donation_date': donor.last_donation_date.isoformat() if donor.last_donation_date else None
-    }), 200
+        'donors': [{
+            'id': donor.id,
+            'name': donor.name,
+            'email': donor.user.email,
+            'phone': donor.phone,
+            'blood_group': donor.blood_group,
+            'age': donor.age,
+            'gender': donor.gender,
+            'city': donor.city,
+            'state': donor.state,
+            'last_donation_date': donor.last_donation_date.isoformat() if donor.last_donation_date else None,
+            'next_eligible_date': donor.next_eligible_date.isoformat() if donor.next_eligible_date else None,
+            'is_eligible': donor.next_eligible_date <= datetime.now().date() if donor.next_eligible_date else True,
+            'created_at': donor.created_at.isoformat()
+        } for donor in donors.items],
+        'total': donors.total,
+        'pages': donors.pages,
+        'current_page': page
+    })
 
-@donor_bp.route('/donation', methods=['POST'])
-@jwt_required()
-def record_donation():
-    """Record a new donation"""
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
-    
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-    
-    donor = Donor.query.filter_by(user_id=user_id).first()
-    
-    if not donor or donor.status != 'approved':
-        return jsonify({'error': 'Not approved as donor'}), 403
-    
+@app.route('/api/donors', methods=['POST'])
+@role_required(['admin', 'donor'])
+def create_donor():
     data = request.get_json()
+    current_user_id = get_jwt_identity()
     
-    # Validation
-    if not data.get('blood_type') or not data.get('quantity') or not data.get('location'):
-        return jsonify({'error': 'Missing required fields'}), 400
+    # Validate required fields
+    required_fields = ['name', 'phone', 'blood_group', 'age', 'gender', 'address', 'city', 'state']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'{field} is required'}), 400
     
-    try:
-        # Check eligibility (56 days since last donation)
-        if donor.last_donation_date:
-            days_since = (datetime.datetime.utcnow() - donor.last_donation_date).days
-            if days_since < 56:
-                return jsonify({'error': f'Can donate again after {56 - days_since} days'}), 409
-        
-        donation = Donation(
-            id=str(uuid.uuid4()),
-            donor_id=user_id,
-            donation_date=datetime.datetime.utcnow(),
-            blood_type=data['blood_type'],
-            quantity=float(data['quantity']),
-            location=data['location'],
-            notes=data.get('notes', '')
-        )
-        
-        donor.last_donation_date = datetime.datetime.utcnow()
-        
-        db.session.add(donation)
-        db.session.commit()
-        
-        logger.info(f"Donation recorded for user: {user_id}")
-        
-        return jsonify({
-            'message': 'Donation recorded successfully',
-            'donation_id': donation.id
-        }), 201
-        
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Donation recording failed: {str(e)}")
-        return jsonify({'error': f'Failed to record donation: {str(e)}'}), 500
+    # Check if donor profile already exists for this user
+    existing_donor = Donor.query.filter_by(user_id=current_user_id).first()
+    if existing_donor:
+        return jsonify({'error': 'Donor profile already exists'}), 400
+    
+    # Create donor
+    last_donation = None
+    if data.get('last_donation_date'):
+        last_donation = datetime.strptime(data['last_donation_date'], '%Y-%m-%d').date()
+    
+    donor = Donor(
+        user_id=current_user_id,
+        name=data['name'],
+        phone=data['phone'],
+        blood_group=data['blood_group'],
+        age=data['age'],
+        gender=data['gender'],
+        address=data['address'],
+        city=data['city'],
+        state=data['state'],
+        last_donation_date=last_donation,
+        next_eligible_date=calculate_next_eligible_date(last_donation)
+    )
+    
+    db.session.add(donor)
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Donor profile created successfully',
+        'donor': {
+            'id': donor.id,
+            'name': donor.name,
+            'blood_group': donor.blood_group,
+            'city': donor.city,
+            'state': donor.state
+        }
+    }), 201
+@app.route('/api/donors/<int:donor_id>', methods=['PUT'])
+@role_required(['admin', 'donor'])
+def update_donor(donor_id):
+    donor = Donor.query.get_or_404(donor_id)
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+    # Check permissions
+    if current_user.role != 'admin' and donor.user_id != current_user_id:
+        return jsonify({'error': 'Insufficient permissions'}), 403
+    data = request.get_json()
+    # Update fields
+    if 'name' in data:
+        donor.name = data['name']
+    if 'phone' in data:
+        donor.phone = data['phone']
+    if 'blood_group' in data:
+        donor.blood_group = data['blood_group']
+    if 'age' in data:
+        donor.age = data['age']
+    if 'gender' in data:
+        donor.gender = data['gender']
+    if 'address' in data:
+        donor.address = data['address']
+    if 'city' in data:
+        donor.city = data['city']
+    if 'state' in data:
+        donor.state = data['state']
+    if 'last_donation_date' in data:
+        last_donation = datetime.strptime(data['last_donation_date'], '%Y-%m-%d').date()
+        donor.last_donation_date = last_donation
+        donor.next_eligible_date = calculate_next_eligible_date(last_donation)
+    db.session.commit()
+    return jsonify({'message': 'Donor updated successfully'})

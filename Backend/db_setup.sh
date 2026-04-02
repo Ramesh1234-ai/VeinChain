@@ -32,8 +32,8 @@ with app.app_context():
 echo -e "${YELLOW}Step 3: Verifying database schema...${NC}"
 
 python -c "
-from app import app, db
-from database import User, Donor, BloodRequest, Donation, Notification, ContactMessage
+from models import app, db
+from models import User, Donor, BloodRequest, Donation, Notification, ContactMessage
 
 with app.app_context():
     # Check tables exist

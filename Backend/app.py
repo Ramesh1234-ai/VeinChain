@@ -9,19 +9,16 @@ import ssl
 import smtplib
 import logging
 from functools import wraps
-
 # Flask imports
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_session import Session
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-
 # Security imports
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from email.message import EmailMessage
-
 # Firebase (optional)
 try:
     from firebase_admin import auth, credentials, initialize_app
@@ -107,7 +104,6 @@ with app.app_context():
     db.create_all()
     logger.info("Database tables created/verified")
 
-
 # ======================== #
 # Utility Functions
 # ======================== #
@@ -192,180 +188,9 @@ def token_required(f):
         
         return f(current_user, *args, **kwargs)
     return decorated
-
-
-# ======================== #
-# Authentication Routes
-# ======================== #
-
-@app.route('/api/auth/register', methods=['POST'])
-def register():
-    """Register a new user."""
-    try:
-        data = request.get_json()
-        
-        # Validation
-        if not data.get('email') or not data.get('password') or not data.get('name'):
-            return jsonify({'error': 'Email, name, and password are required'}), 400
-        
-        # Check if user exists
-        if User.query.filter_by(email=data['email']).first():
-            return jsonify({'error': 'User already exists'}), 409
-        
-        # Create user
-        user = User(
-            id=str(uuid.uuid4()),
-            name=data['name'],
-            email=data['email'],
-            username=data.get('username') or data['email'],
-            role=data.get('role', 'donor'),
-            auth_method='local'
-        )
-        user.set_password(data['password'])
-        
-        db.session.add(user)
-        db.session.commit()
-        
-        logger.info(f"User registered: {user.email}")
-        
-        return jsonify({
-            'message': 'Registration successful',
-            'user': user.to_dict()
-        }), 201
-        
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Registration failed: {e}", exc_info=True)
-        return jsonify({'error': f'Registration failed: {str(e)}'}), 500
-
-
-@app.route('/api/auth/login', methods=['POST'])
-def login():
-    """Login with email and password."""
-    try:
-        data = request.get_json()
-        email = data.get('email')
-        password = data.get('password')
-        
-        if not email or not password:
-            return jsonify({'error': 'Email and password are required'}), 400
-        
-        user = User.query.filter_by(email=email).first()
-        
-        if not user or not user.check_password(password):
-            logger.warning(f"Failed login attempt for {email}")
-            return jsonify({'error': 'Invalid credentials'}), 401
-        
-        # Create token
-        access_token = create_access_token(identity=user.id)
-        
-        # Store in session
-        session['user'] = {
-            'id': user.id,
-            'name': user.name,
-            'email': user.email,
-            'role': user.role
-        }
-        
-        logger.info(f"User logged in: {user.email}")
-        
-        return jsonify({
-            'message': 'Login successful',
-            'access_token': access_token,
-            'user': user.to_dict()
-        }), 200
-        
-    except Exception as e:
-        logger.error(f"Login failed: {e}", exc_info=True)
-        return jsonify({'error': 'Login failed'}), 500
-
-
-@app.route('/api/auth/firebase-login', methods=['POST'])
-def firebase_login():
-    """Login using Firebase ID token."""
-    if not FIREBASE_ENABLED:
-        return jsonify({
-            'error': 'Firebase not configured',
-            'message': 'Place service account JSON at Backend/firebase_config.json'
-        }), 503
-    
-    try:
-        data = request.get_json()
-        id_token = data.get('idToken')
-        
-        if not id_token:
-            return jsonify({'error': 'Missing Firebase token'}), 400
-        
-        # Verify token with Firebase
-        decoded_token = auth.verify_id_token(id_token)
-        email = decoded_token['email']
-        name = decoded_token.get('name', email.split("@")[0])
-        
-        # Fetch or create user
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            user = User(
-                id=str(uuid.uuid4()),
-                name=name,
-                email=email,
-                username=email.split("@")[0],
-                role='donor',
-                auth_method='firebase'
-            )
-            db.session.add(user)
-            db.session.commit()
-            logger.info(f"New Firebase user created: {email}")
-        
-        # Generate JWT token for frontend
-        access_token = create_access_token(identity=user.id)
-        
-        # Store in session
-        session['user'] = {
-            'id': user.id,
-            'name': user.name,
-            'email': user.email,
-            'role': user.role
-        }
-        
-        # Send notification
-        send_notification(user, f"Welcome {user.name}! You logged in via Firebase.")
-        
-        return jsonify({
-            'success': True,
-            'message': 'Firebase login successful',
-            'access_token': access_token,
-            'user': user.to_dict()
-        }), 200
-        
-    except Exception as e:
-        logger.error(f"Firebase login failed: {e}", exc_info=True)
-        return jsonify({'error': 'Firebase login failed'}), 400
-
-
-@app.route("/api/auth/status")
-def auth_status():
-    """Check authentication status."""
-    if "user" in session:
-        return jsonify({
-            "logged_in": True,
-            "user": session["user"]
-        }), 200
-    else:
-        return jsonify({"logged_in": False}), 401
-
-
-@app.route("/api/auth/logout", methods=["POST"])
-def logout():
-    """Logout user."""
-    session.clear()
-    logger.info("User logged out")
-    return jsonify({"message": "Logged out successfully"}), 200
-
-
 # ======================== #
 # Donation Routes
 # ======================== #
-
 @app.route('/api/donations', methods=['POST'])
 @token_required
 def create_donation(current_user):
@@ -380,7 +205,6 @@ def create_donation(current_user):
         required_fields = ['blood_type', 'quantity', 'location']
         if not all(data.get(field) for field in required_fields):
             return jsonify({'error': 'Missing required fields'}), 400
-        
         donation = Donation(
             id=str(uuid.uuid4()),
             donor_id=current_user.id,
@@ -412,54 +236,6 @@ def create_donation(current_user):
         db.session.rollback()
         logger.error(f"Create donation failed: {e}", exc_info=True)
         return jsonify({'error': 'Failed to create donation'}), 500
-
-
-@app.route('/api/blood-requests', methods=['POST'])
-@token_required
-def create_blood_request(current_user):
-    """Create a new blood request."""
-    try:
-        data = request.get_json()
-        
-        # Validation
-        required_fields = ['blood_type', 'quantity', 'urgency', 'hospital', 'contact_number']
-        if not all(data.get(field) for field in required_fields):
-            return jsonify({'error': 'Missing required fields'}), 400
-        
-        blood_request = BloodRequest(
-            id=str(uuid.uuid4()),
-            requester_id=current_user.id,
-            blood_type=data['blood_type'],
-            quantity=float(data['quantity']),
-            urgency=data['urgency'],
-            hospital=data['hospital'],
-            contact_number=data['contact_number'],
-            notes=data.get('notes', ''),
-            request_date=datetime.datetime.utcnow(),
-            status='pending'
-        )
-        
-        db.session.add(blood_request)
-        db.session.commit()
-        
-        send_notification(
-            current_user,
-            f"Your request for {blood_request.quantity} units of {blood_request.blood_type} has been submitted."
-        )
-        
-        logger.info(f"Blood request created: {blood_request.id} by {current_user.email}")
-        
-        return jsonify({
-            'message': 'Blood request created',
-            'request_id': blood_request.id
-        }), 201
-        
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Create blood request failed: {e}", exc_info=True)
-        return jsonify({'error': 'Failed to create blood request'}), 500
-
-
 @app.route('/api/donations', methods=['GET'])
 def get_donations():
     """Get all donations (with pagination)."""
@@ -486,74 +262,9 @@ def get_donations():
     except Exception as e:
         logger.error(f"Get donations failed: {e}", exc_info=True)
         return jsonify({'error': 'Failed to fetch donations'}), 500
-
-
-# ======================== #
-# Notification Routes
-# ======================== #
-
-@app.route('/api/notifications', methods=['GET'])
-@token_required
-def get_notifications(current_user):
-    """Get user's notifications."""
-    try:
-        notifs = Notification.query.filter_by(user_id=current_user.id).order_by(
-            Notification.created_at.desc()
-        ).all()
-        
-        return jsonify([{
-            'id': n.id,
-            'message': n.message,
-            'created_at': n.created_at.isoformat()
-        } for n in notifs]), 200
-        
-    except Exception as e:
-        logger.error(f"Get notifications failed: {e}", exc_info=True)
-        return jsonify({'error': 'Failed to fetch notifications'}), 500
-
-
-# ======================== #
-# Contact Route
-# ======================== #
-
-@app.route('/api/contact', methods=['POST'])
-def submit_contact():
-    """Submit contact message."""
-    try:
-        data = request.get_json() or {}
-        
-        # Validation
-        required = ['name', 'email', 'message']
-        if not all(data.get(field) for field in required):
-            return jsonify({'error': 'Name, email, and message are required'}), 400
-        
-        msg = ContactMessage(
-            id=str(uuid.uuid4()),
-            name=data['name'],
-            email=data['email'],
-            phone=data.get('phone'),
-            subject=data.get('subject'),
-            message=data['message'],
-            created_at=datetime.datetime.utcnow()
-        )
-        
-        db.session.add(msg)
-        db.session.commit()
-        
-        logger.info(f"Contact message from {data['email']}")
-        
-        return jsonify({'message': 'Contact message received'}), 201
-        
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Submit contact failed: {e}", exc_info=True)
-        return jsonify({'error': 'Failed to submit contact message'}), 500
-
-
 # ======================== #
 # Admin Routes
 # ======================== #
-
 @app.route("/admin/pending-donors", methods=["GET"])
 @token_required
 def get_pending_donors(current_user):
@@ -589,13 +300,10 @@ def get_pending_donors(current_user):
 # ======================== #
 # Frontend Pages
 # ======================== #
-
 @app.route('/')
 def home():
     """Serve home page."""
     return render_template('index.html')
-
-
 @app.route('/<path:name>.html')
 def html_alias(name):
     """Serve any HTML file from templates."""
@@ -604,26 +312,18 @@ def html_alias(name):
     except Exception as e:
         logger.warning(f"Template not found: {name}")
         return "Not Found", 404
-
-
 @app.route("/dashboard")
 def dashboard():
     """Serve dashboard."""
     return render_template("dashboard.html")
-
-
 @app.route('/about')
 def about_page():
     """Serve about page."""
     return render_template('about.html')
-
-
 @app.route("/adminPanel")
 def admin_panel():
     """Serve admin panel."""
     return render_template("adminPanel.html")
-
-
 @app.route("/recipient")
 def recipient():
     """Serve recipient page."""
@@ -640,16 +340,12 @@ def recipient():
     except Exception as e:
         logger.error(f"Recipient page error: {e}", exc_info=True)
         return jsonify({"error": str(e)}), 500
-
-
 @app.route("/api/protected")
 def protected():
     """Protected route - requires session."""
     if "user" not in session:
         return jsonify({"error": "User not logged in"}), 401
     return jsonify({"message": f"Welcome {session['user']['name']}"})
-
-
 @app.route('/api/inventory', methods=['GET'])
 def get_inventory():
     """Get blood inventory."""
@@ -665,30 +361,9 @@ def get_inventory():
         {"blood_group": "AB-", "units": 1},
     ]
     return jsonify(inventory), 200
-
-
-# ======================== #
-# Error Handlers
-# ======================== #
-
-@app.errorhandler(404)
-def not_found(error):
-    """Handle 404 errors."""
-    return jsonify({'error': 'Not found'}), 404
-
-
-@app.errorhandler(500)
-def internal_error(error):
-    """Handle 500 errors."""
-    db.session.rollback()
-    logger.error(f"Internal server error: {error}", exc_info=True)
-    return jsonify({'error': 'Internal server error'}), 500
-
-
 # ======================== #
 # Application Entry Point
 # ======================== #
-
 if __name__ == '__main__':
     app.run(
         host='0.0.0.0',
