@@ -16,5 +16,6 @@ venv/
 flask_session/
 Frontend/.vercel/
 Frontend/templates/.vercel/
-.vscode 
+.vscode/
+flask_session/ 
 Backend/flask_session
