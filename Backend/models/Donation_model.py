@@ -1,6 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
+from . import db
 from datetime import datetime
 import uuid
+db = SQLAlchemy()
 class Donation(db.Model):
     __tablename__ = 'donation'
     

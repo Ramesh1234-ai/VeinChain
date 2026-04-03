@@ -44,25 +44,32 @@ def create_blood_request(current_user):
     db.session.commit()
     send_notification(current_user, f"Your request for {new_request.quantity} units of {new_request.blood_type} has been submitted.")
     return jsonify({'message': 'Blood request created'}), 201
-@app.route('/api/notifications', methods=['GET'])
-@token_required
-def get_notifications(current_user):
-    notifs = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
-    return jsonify([{'id': n.id, 'message': n.message, 'created_at': n.created_at.isoformat()} for n in notifs]), 200
-@app.route('/api/contact', methods=['POST'])
-def submit_contact():
-    data = request.get_json() or {}
-    if not data.get('name') or not data.get('email') or not data.get('message'):
-        return jsonify({'message': 'Name, email, and message required'}), 400
-    msg = ContactMessage(
-        id=str(uuid.uuid4()),
-        name=data['name'],
-        email=data['email'],
-        phone=data.get('phone'),
-        subject=data.get('subject'),
-        message=data['message'],
-        created_at=datetime.datetime.utcnow()
-    )
-    db.session.add(msg)
-    db.session.commit()
-    return jsonify({'message': 'Contact message saved'}), 201
+# ======================== #
+# Donation Routes
+# ======================== #
+@app.route('/api/donations', methods=['GET'])
+def get_donations():
+    """Get all donations (with pagination)."""
+    try:
+        page = request.args.get('page', 1, type=int)
+        limit = request.args.get('limit', 20, type=int)
+        
+        paginated = Donation.query.paginate(page=page, per_page=limit)
+        
+        return jsonify({
+            'total': paginated.total,
+            'page': page,
+            'limit': limit,
+            'data': [{
+                'id': d.id,
+                'donor_id': d.donor_id,
+                'blood_type': d.blood_type,
+                'quantity': d.quantity,
+                'location': d.location,
+                'donation_date': d.donation_date.isoformat()
+            } for d in paginated.items]
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Get donations failed: {e}", exc_info=True)
+        return jsonify({'error': 'Failed to fetch donations'}), 500

@@ -56,7 +56,6 @@ def create_app(config=None):
         'DATABASE_URL',
         app.config.get('SQLALCHEMY_DATABASE_URI')
     )
-    
     # Initialize extensions
     db.init_app(app)
     JWTManager(app)
@@ -66,59 +65,45 @@ def create_app(config=None):
         supports_credentials=True, 
         origins=os.getenv('CORS_ORIGINS', 'http://localhost:5500').split(',')
     )
-    
     # Create database tables
     with app.app_context():
         db.create_all()
-    
     # Store generate_avatar in app context
     app.generate_avatar = generate_avatar
-    
     # Register blueprints
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    
     # Frontend routes
     @app.route('/')
     def index():
         return render_template('index.html')
-    
     @app.route('/dashboard')
     def dashboard():
         return render_template('dashboard.html')
-    
     @app.route('/login')
     def login_page():
         return render_template('login.html')
-    
     @app.route('/register')
     def register_page():
         return render_template('register.html')
-    
     @app.route('/about')
     def about():
         return render_template('about.html')
-    
     @app.route('/adminPanel')
     def admin_panel():
         return render_template('adminPanel.html')
-    
     # Health check endpoint
     @app.route('/health', methods=['GET'])
     def health():
         return jsonify({'status': 'ok'}), 200
-    
     # Error handlers
     @app.errorhandler(404)
     def not_found(error):
         return jsonify({'error': 'Not found'}), 404
-    
     @app.errorhandler(500)
     def server_error(error):
         logger.error(f"Server error: {error}")
         return jsonify({'error': 'Internal server error'}), 500
-    
     logger.info(f"App created with config: {config.__name__}")
-    
     return app
 # Create app instance for Gunicorn/Railway
 app = create_app()

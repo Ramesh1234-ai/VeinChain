@@ -99,7 +99,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = app.config.get(
 db.init_app(app)
 with app.app_context():
     db.create_all()
-
 # ------------------------- #
 # Utility: Notifications
 # ------------------------- #
@@ -122,26 +121,6 @@ def send_notification(user, message):
             smtp.send_message(msg)
     except Exception as e:
         print("❌ Notification failed:", e)
-
-# ------------------------- #
-# Auth Decorator
-# ------------------------- #
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = request.headers.get('Authorization', None)
-        if token:
-            token = token.split(" ")[1]
-        if not token:
-            return jsonify({'message': 'Token missing'}), 401
-        try:
-            data = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-            current_user = User.query.filter_by(id=data['user_id']).first()
-        except:
-            return jsonify({'message': 'Token invalid'}), 401
-        return f(current_user, *args, **kwargs)
-    return decorated
-
 # ------------------------- #
 # Auth Routes
 # ------------------------- #

@@ -2,12 +2,10 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import uuid
-
+from . import db
 db = SQLAlchemy()
-
 class User(db.Model):
     __tablename__ = 'user'
-    
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     username = db.Column(db.String(120), unique=True)
     name = db.Column(db.String(100), nullable=False)

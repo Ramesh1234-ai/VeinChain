@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import uuid
+from . import db
 db = SQLAlchemy()
 class Donor(db.Model):
     __tablename__ = 'donor'

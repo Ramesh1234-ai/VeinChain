@@ -1,3 +1,8 @@
+from . import db
+from datetime import datetime
+import uuid
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
 class ContactMessage(db.Model):
     __tablename__ = 'contact_message'    
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
