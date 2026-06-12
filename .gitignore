@@ -19,3 +19,6 @@ Frontend/templates/.vercel/
 .vscode/
 flask_session/ 
 Backend/flask_session
+flask_session/
+Documentation/
+.vscode/
